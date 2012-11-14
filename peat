@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+# -*- coding: utf8 -*-
+
+                         ##############################
+                        #  ____    ___   ____  ______  #
+                        # |    \  /  _] /    T|      T #
+                        # |  o  )/  [_ Y  o  ||      | #
+                        # |   _/Y    _]|     |l_j  l_j #
+                        # |  |  |   [_ |  _  |  |  |   #
+                        # |  |  |     T|  |  |  |  |   #
+                        # l__j  l_____jl__j__j  l__j   #
+                        #                              #
+                         #####                    #####
+                              # Repeat commands! #
+                               ##################
+
+import os, subprocess, sys, time
+from optparse import OptionParser
+
+
+interval = 1.0
+command = 'true'
+clear = True
+paths = set()
+verbose = True
+
+
+def log(s):
+    if verbose:
+        print s
+
+def die(s):
+    sys.stderr.write('ERROR: ' + s + '\n')
+    sys.exit(1)
+
+def check(paths):
+    cutoff = int(time.time() - interval)
+    for p in paths:
+        if os.stat(p).st_mtime >= cutoff:
+            return True
+    return False
+
+def run():
+    log("running: " + command)
+    subprocess.call(command, shell=True)
+
+def build_option_parser():
+    p = OptionParser("usage: %prog [options] COMMAND\n\n"
+                     "A list of paths to watch should be piped in on standard input.\n\n"
+                     "COMMAND should be given as a single argument using a "
+                     "shell string.\n\nFor example:\n\n"
+                     "    find . | peat './test.sh'\n"
+                     "    find . -name '*.py' | peat 'rm *.pyc'\n"
+                     "    find . -name '*.py' -print0 | peat -0 'rm *.pyc'"
+                     )
+
+    # Main options
+    p.add_option('-i', '--interval', default='1000',
+                 help='interval between checks in milliseconds (default 1000)',
+                 metavar='N')
+    p.add_option('-c', '--clear', default=True,
+                 action='store_true', dest='clear',
+                 help='clear screen before runs (default)')
+    p.add_option('-C', '--no-clear',
+                 action='store_false', dest='clear',
+                 help="don't clear screen before runs")
+    p.add_option('-v', '--verbose', default=True,
+                 action='store_true', dest='verbose',
+                 help='show extra logging output (default)')
+    p.add_option('-q', '--quiet',
+                 action='store_false', dest='verbose',
+                 help="don't show extra logging output")
+    p.add_option('-w', '--whitespace', default=None,
+                 action='store_const', dest='sep', const=None,
+                 help="assume paths on stdin are separated by whitespace (default)")
+    p.add_option('-n', '--newlines',
+                 action='store_const', dest='sep', const='\n',
+                 help="assume paths on stdin are separated by newlines")
+    p.add_option('-s', '--spaces',
+                 action='store_const', dest='sep', const=' ',
+                 help="assume paths on stdin are separated by spaces")
+    p.add_option('-0', '--zero',
+                 action='store_const', dest='sep', const='\0',
+                 help="assume paths on stdin are separated by null bytes")
+
+    return p
+
+
+def _main():
+    log("Watching the following paths:")
+    for p in paths:
+        log("  " + p)
+    log('')
+
+    run()
+
+    while True:
+        time.sleep(interval)
+        if check(paths):
+            if clear:
+                subprocess.check_call('clear')
+            run()
+
+def main():
+    global interval, command, clear, paths, verbose
+
+    (options, args) = build_option_parser().parse_args()
+
+    if len(args) != 1:
+        die("exactly one command must be given")
+
+    command = args[0]
+    interval = int(options.interval) / 1000.0
+    clear = options.clear
+    verbose = options.verbose
+    sep = options.sep
+
+    data = sys.stdin.read()
+    if not sep:
+        paths = data.split()
+    else:
+        paths = data.split(sep)
+
+    paths = [p.rstrip('\n') for p in paths if p]
+    paths = map(os.path.abspath, paths)
+    paths = set(paths)
+
+    for path in paths:
+        if not os.path.exists(path):
+            die('path to watch does not exist: ' + repr(path))
+
+    if not paths:
+        die("no paths to watch were given on standard input")
+
+    _main()
+
+
+if __name__ == '__main__':
+    main()
+
