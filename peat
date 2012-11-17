@@ -55,9 +55,11 @@ def build_option_parser():
                      )
 
     # Main options
-    p.add_option('-i', '--interval', default='1000',
-                 help='interval between checks in milliseconds (default 1000)',
+    p.add_option('-i', '--interval', default=None,
+                 help='interval between checks in milliseconds',
                  metavar='N')
+    p.add_option('-I', '--smart-interval', dest='interval',
+                 help='determine the interval based on number of files watched (default)')
     p.add_option('-c', '--clear', default=True,
                  action='store_true', dest='clear',
                  help='clear screen before runs (default)')
@@ -91,6 +93,8 @@ def _main():
     for p in paths:
         log("  " + p)
     log('')
+    log('Checking for changes every %d milliseconds.' % int(interval * 1000))
+    log('')
 
     run()
 
@@ -101,6 +105,14 @@ def _main():
                 subprocess.check_call('clear')
             run()
 
+def smart_interval(count):
+    """Return the smart interval to use in milliseconds."""
+    if count >= 50:
+        return 1000
+    else:
+        sq = lambda n: n * n
+        return int(1000 * (1 - (sq(50.0 - count) / sq(50))))
+
 def main():
     global interval, command, clear, paths, verbose
 
@@ -110,7 +122,6 @@ def main():
         die("exactly one command must be given")
 
     command = args[0]
-    interval = int(options.interval) / 1000.0
     clear = options.clear
     verbose = options.verbose
     sep = options.sep
@@ -124,6 +135,12 @@ def main():
     paths = [p.rstrip('\n') for p in paths if p]
     paths = map(os.path.abspath, paths)
     paths = set(paths)
+
+    if options.interval:
+        interval = int(options.interval)
+    else:
+        interval = smart_interval(len(paths))
+    interval = interval / 1000.0
 
     for path in paths:
         if not os.path.exists(path):
