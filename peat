@@ -59,6 +59,7 @@ def build_option_parser():
                  help='interval between checks in milliseconds',
                  metavar='N')
     p.add_option('-I', '--smart-interval', dest='interval',
+                 action='store_const', const=None,
                  help='determine the interval based on number of files watched (default)')
     p.add_option('-c', '--clear', default=True,
                  action='store_true', dest='clear',
