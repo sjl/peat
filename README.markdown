@@ -66,17 +66,19 @@ Here's the full usage:
         find . -name '*.py' -print0 | peat -0 'rm *.pyc'
 
     Options:
-      -h, --help          show this help message and exit
-      -i N, --interval=N  interval between checks in milliseconds (default 1000)
-      -c, --clear         clear screen before runs (default)
-      -C, --no-clear      don't clear screen before runs
-      -v, --verbose       show extra logging output (default)
-      -q, --quiet         don't show extra logging output
-      -w, --whitespace    assume paths on stdin are separated by whitespace
-                          (default)
-      -n, --newlines      assume paths on stdin are separated by newlines
-      -s, --spaces        assume paths on stdin are separated by spaces
-      -0, --zero          assume paths on stdin are separated by null bytes
+      -h, --help            show this help message and exit
+      -i N, --interval=N    interval between checks in milliseconds
+      -I, --smart-interval  determine the interval based on number of files
+                            watched (default)
+      -c, --clear           clear screen before runs (default)
+      -C, --no-clear        don't clear screen before runs
+      -v, --verbose         show extra logging output (default)
+      -q, --quiet           don't show extra logging output
+      -w, --whitespace      assume paths on stdin are separated by whitespace
+                            (default)
+      -n, --newlines        assume paths on stdin are separated by newlines
+      -s, --spaces          assume paths on stdin are separated by spaces
+      -0, --zero            assume paths on stdin are separated by null bytes
 
 License
 -------
