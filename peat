@@ -14,7 +14,7 @@
                               # Repeat commands! #
                                ##################
 
-import os, subprocess, sys, time
+import errno, os, subprocess, sys, time
 from optparse import OptionParser
 
 
@@ -36,8 +36,16 @@ def die(s):
 def check(paths):
     cutoff = int(time.time() - interval)
     for p in paths:
-        if os.stat(p).st_mtime >= cutoff:
-            return True
+        try:
+            if os.stat(p).st_mtime >= cutoff:
+                return True
+        except OSError, e:
+            # If the file has been deleted since we started watching, don't
+            # worry about it.
+            if e.errno == errno.ENOENT:
+                pass
+            else:
+                raise
     return False
 
 def run():
