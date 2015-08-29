@@ -57,26 +57,15 @@ If you want to build the file list fresh each time (so that `peat` will pick up
 newly created files without having to restart it) you can use the `--dynamic`
 option.
 
-Instead of piping in the list of files to watch, you'll pipe in a *command* that
-`peat` will run to generate the list before every check.  For example:
+Instead of piping in the list of files to watch, you'll specify a *command* that
+`peat` will run to generate the list before every check (as well as the actual
+command to run, of course).  For example:
 
     $ ffind ".markdown$"
     ./foo.markdown
     ./bar/baz.markdown
 
-    $ echo 'ffind ".markdown$"'
-    ffind ".markdown$"
-
-    $ echo 'ffind ".markdown$"' | peat --dynamic 'echo "A file changed!"'
-
-If your command contains quotes you'll need to make sure they get passed
-into peat properly.  For example, the following will **not** work:
-
-    $ echo "find . -name '*.markdown'" | peat --dynamic ...
-
-The problem is that the shell will expand the `*` in the double-quoted string
-before it ever gets to `peat`.  Google around and learn about shell quoting if
-you don't understand.  This can be tricky.  You've been warned.
+    $ peat --dynamic 'ffind ".markdown$"' 'echo "A file changed!"'
 
 ### Full Usage
 
@@ -94,17 +83,11 @@ Here's the full usage:
         find . -name '*.py' | peat 'rm *.pyc'
         find . -name '*.py' -print0 | peat -0 'rm *.pyc'
 
-    If --dynamic is given, a command to generate the list should be piped in
-    on standard input instead.  It will be used to generate the list of files
-    to check before each run.
+    If --dynamic is used, the given command will be run each time to generate the
+    list of files to check:
 
-    This command must be quoted properly, and this can be tricky.  Make sure
-    you know what you're doing.
-
-    For example:
-
-        echo find . | peat --dynamic './test.sh'
-        echo find . -name '*.py' | peat --dynamic 'rm *.pyc'
+        peat --dynamic 'find .' './test.sh'
+        peat --dynamic 'find . -name '\''*.py'\''' 'rm *.pyc'
 
 
     Options:
@@ -112,18 +95,18 @@ Here's the full usage:
       -i N, --interval=N    interval between checks in milliseconds
       -I, --smart-interval  determine the interval based on number of files
                             watched (default)
-      -d, --dynamic         take a command on standard input to generate the list
-                            of files to watch
+      -d COMMAND, --dynamic=COMMAND
+                            run COMMAND before each run to generate the list of
+                            files to check
       -D, --no-dynamic      take a list of files to watch on standard in (default)
       -c, --clear           clear screen before runs (default)
       -C, --no-clear        don't clear screen before runs
       -v, --verbose         show extra logging output (default)
       -q, --quiet           don't show extra logging output
-      -w, --whitespace      assume paths on stdin are separated by whitespace
-                            (default)
-      -n, --newlines        assume paths on stdin are separated by newlines
-      -s, --spaces          assume paths on stdin are separated by spaces
-      -0, --zero            assume paths on stdin are separated by null bytes
+      -w, --whitespace      assume paths are separated by whitespace (default)
+      -n, --newlines        assume paths are separated by newlines
+      -s, --spaces          assume paths are separated by spaces
+      -0, --zero            assume paths are separated by null bytes
 
 License
 -------

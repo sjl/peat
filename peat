@@ -23,11 +23,9 @@ command = 'true'
 clear = True
 get_paths = lambda: set()
 verbose = True
-dynamic = False
-paths_command = None
+dynamic = None
 
-USAGE = """\
-usage: %prog [options] COMMAND
+USAGE = r"""usage: %prog [options] COMMAND
 
 COMMAND should be given as a single argument using a shell string.
 
@@ -39,17 +37,11 @@ For example:
     find . -name '*.py' | peat 'rm *.pyc'
     find . -name '*.py' -print0 | peat -0 'rm *.pyc'
 
-If --dynamic is given, a command to generate the list should be piped in
-on standard input instead.  It will be used to generate the list of files
-to check before each run.
+If --dynamic is used, the given command will be run each time to generate the
+list of files to check:
 
-This command must be quoted properly, and this can be tricky.  Make sure
-you know what you're doing.
-
-For example:
-
-    echo find . | peat --dynamic './test.sh'
-    echo find . -name '*.py' | peat --dynamic 'rm *.pyc'
+    peat --dynamic 'find .' './test.sh'
+    peat --dynamic 'find . -name '\''*.py'\''' 'rm *.pyc'
 """
 
 
@@ -90,36 +82,40 @@ def build_option_parser():
     p.add_option('-I', '--smart-interval', dest='interval',
                  action='store_const', const=None,
                  help='determine the interval based on number of files watched (default)')
-    p.add_option('-d', '--dynamic', default=False,
-                 action='store_true',
-                 help='take a command on standard input to generate the list of files to watch')
+
+    p.add_option('-d', '--dynamic', default=None,
+                 help='run COMMAND before each run to generate the list of files to check',
+                 metavar='COMMAND')
     p.add_option('-D', '--no-dynamic', dest='dynamic',
-                 action='store_false',
+                 action='store_const', const=None,
                  help='take a list of files to watch on standard in (default)')
+
     p.add_option('-c', '--clear', default=True,
                  action='store_true', dest='clear',
                  help='clear screen before runs (default)')
     p.add_option('-C', '--no-clear',
                  action='store_false', dest='clear',
                  help="don't clear screen before runs")
+
     p.add_option('-v', '--verbose', default=True,
                  action='store_true', dest='verbose',
                  help='show extra logging output (default)')
     p.add_option('-q', '--quiet',
                  action='store_false', dest='verbose',
                  help="don't show extra logging output")
+
     p.add_option('-w', '--whitespace', default=None,
                  action='store_const', dest='sep', const=None,
-                 help="assume paths on stdin are separated by whitespace (default)")
+                 help="assume paths are separated by whitespace (default)")
     p.add_option('-n', '--newlines',
                  action='store_const', dest='sep', const='\n',
-                 help="assume paths on stdin are separated by newlines")
+                 help="assume paths are separated by newlines")
     p.add_option('-s', '--spaces',
                  action='store_const', dest='sep', const=' ',
-                 help="assume paths on stdin are separated by spaces")
+                 help="assume paths are separated by spaces")
     p.add_option('-0', '--zero',
                  action='store_const', dest='sep', const='\0',
-                 help="assume paths on stdin are separated by null bytes")
+                 help="assume paths are separated by null bytes")
 
     return p
 
@@ -127,7 +123,7 @@ def build_option_parser():
 def _main():
     if dynamic:
         log("Running the following command to generate watch list:")
-        log('  ' + paths_command)
+        log('  ' + dynamic)
         log('')
 
     log("Watching the following paths:")
@@ -178,7 +174,7 @@ def _parse_paths(sep, data):
     return paths
 
 def main():
-    global interval, command, clear, get_paths, verbose, dynamic, paths_command
+    global interval, command, clear, get_paths, verbose, dynamic
 
     (options, args) = build_option_parser().parse_args()
 
@@ -192,13 +188,8 @@ def main():
     dynamic = options.dynamic
 
     if dynamic:
-        paths_command = sys.stdin.read().rstrip()
-
-        if not paths_command:
-            die("no command to generate watch list was given on standard input")
-
         def _get_paths():
-            data = subprocess.check_output(paths_command, shell=True)
+            data = subprocess.check_output(dynamic, shell=True)
             return _parse_paths(sep, data)
 
         get_paths = _get_paths
