@@ -6,6 +6,8 @@ setuptools.setup(
     name='peat',
     version=VERSION,
     description='Repeat commands!',
+    maintainer='@bmcorser',
+    maintainer_email='bmcorser@gmail.com',
     url='https://github.com/bmcorser/peat',
     py_modules=['peat'],
     entry_points='''
