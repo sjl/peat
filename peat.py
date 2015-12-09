@@ -55,7 +55,7 @@ For example:
 
 def log(s):
     if verbose:
-        print s
+        print(s)
 
 def die(s):
     sys.stderr.write('ERROR: ' + s + '\n')
@@ -67,7 +67,7 @@ def check(paths):
         try:
             if os.stat(p).st_mtime >= cutoff:
                 return True
-        except OSError, e:
+        except OSError as e:
             # If the file has been deleted since we started watching, don't
             # worry about it.
             if e.errno == errno.ENOENT:
@@ -220,11 +220,10 @@ def main():
     _main()
 
 
-if __name__ == '__main__':
+def entry_point():
     import signal
     def sigint_handler(signal, frame):
         sys.stdout.write('\n')
         sys.exit(130)
     signal.signal(signal.SIGINT, sigint_handler)
     main()
-
