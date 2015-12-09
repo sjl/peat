@@ -220,11 +220,10 @@ def main():
     _main()
 
 
-if __name__ == '__main__':
+def entry_point():
     import signal
     def sigint_handler(signal, frame):
         sys.stdout.write('\n')
         sys.exit(130)
     signal.signal(signal.SIGINT, sigint_handler)
     main()
-
