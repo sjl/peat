@@ -67,6 +67,13 @@ command to run, of course).  For example:
 
     $ peat --dynamic 'ffind ".markdown$"' 'echo "A file changed!"'
 
+### Tips & Tricks
+
+Watch all the files Mercurial is tracking (instead of hand-crafting a `find`
+command to output that list) and run `make` on changes:
+
+    $ hg files | peat make
+
 ### Full Usage
 
 Here's the full usage:
@@ -111,7 +118,7 @@ Here's the full usage:
 License
 -------
 
-Copyright 2012 Steve Losh and contributors.
+Copyright 2016 Steve Losh and contributors.
 
 Licensed under [version 3 of the GPL][gpl].
 
