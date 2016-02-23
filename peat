@@ -24,6 +24,8 @@ clear = True
 get_paths = lambda: set()
 verbose = True
 dynamic = None
+last_run = None
+
 
 USAGE = r"""usage: %prog [options] COMMAND
 
@@ -54,10 +56,9 @@ def die(s):
     sys.exit(1)
 
 def check(paths):
-    cutoff = int(time.time() - interval)
     for p in paths:
         try:
-            if os.stat(p).st_mtime >= cutoff:
+            if os.stat(p).st_mtime >= last_run:
                 return True
         except OSError as e:
             # If the file has been deleted since we started watching, don't
@@ -69,6 +70,8 @@ def check(paths):
     return False
 
 def run():
+    global last_run
+    last_run = time.time()
     log("running: " + command)
     subprocess.call(command, shell=True)
 
