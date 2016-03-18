@@ -14,7 +14,7 @@ It's kind of like [Kicker][] except:
 [Kicker]: https://github.com/alloy/kicker
 [friendly-find]: https://github.com/sjl/friendly-find
 
-## Table of Contents
+**Table of Contents**
 
 [TOC]
 
