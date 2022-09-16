@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-                         ##############################
-                        #  ____    ___   ____  ______  #
-                        # |    \  /  _] /    T|      T #
-                        # |  o  )/  [_ Y  o  ||      | #
-                        # |   _/Y    _]|     |l_j  l_j #
-                        # |  |  |   [_ |  _  |  |  |   #
-                        # |  |  |     T|  |  |  |  |   #
-                        # l__j  l_____jl__j__j  l__j   #
-                        #                              #
-                         #####                    #####
-                              # Repeat commands! #
-                               ##################
+##############################
+#  ____    ___   ____  ______  #
+# |    \  /  _] /    T|      T #
+# |  o  )/  [_ Y  o  ||      | #
+# |   _/Y    _]|     |l_j  l_j #
+# |  |  |   [_ |  _  |  |  |   #
+# |  |  |     T|  |  |  |  |   #
+# l__j  l_____jl__j__j  l__j   #
+#                              #
+#####                    #####
+# Repeat commands! #
+##################
 
 import errno, os, subprocess, sys, time
 from optparse import OptionParser
 
 
 interval = 1.0
-command = 'true'
+command = "true"
 clear = True
 get_paths = lambda: set()
 verbose = True
@@ -51,9 +51,11 @@ def log(s):
     if verbose:
         print(s)
 
+
 def die(s):
-    sys.stderr.write('ERROR: ' + s + '\n')
+    sys.stderr.write("ERROR: " + s + "\n")
     sys.exit(1)
+
 
 def check(paths):
     for p in paths:
@@ -69,56 +71,115 @@ def check(paths):
                 raise
     return False
 
+
 def run():
     global last_run
     last_run = time.time()
     log("running: " + command)
     subprocess.call(command, shell=True)
 
+
 def build_option_parser():
     p = OptionParser(USAGE)
 
     # Main options
-    p.add_option('-i', '--interval', default=None,
-                 help='interval between checks in milliseconds',
-                 metavar='N')
-    p.add_option('-I', '--smart-interval', dest='interval',
-                 action='store_const', const=None,
-                 help='determine the interval based on number of files watched (default)')
+    p.add_option(
+        "-i",
+        "--interval",
+        default=None,
+        help="interval between checks in milliseconds",
+        metavar="N",
+    )
+    p.add_option(
+        "-I",
+        "--smart-interval",
+        dest="interval",
+        action="store_const",
+        const=None,
+        help="determine the interval based on number of files watched (default)",
+    )
 
-    p.add_option('-d', '--dynamic', default=None,
-                 help='run COMMAND before each run to generate the list of files to check',
-                 metavar='COMMAND')
-    p.add_option('-D', '--no-dynamic', dest='dynamic',
-                 action='store_const', const=None,
-                 help='take a list of files to watch on standard in (default)')
+    p.add_option(
+        "-d",
+        "--dynamic",
+        default=None,
+        help="run COMMAND before each run to generate the list of files to check",
+        metavar="COMMAND",
+    )
+    p.add_option(
+        "-D",
+        "--no-dynamic",
+        dest="dynamic",
+        action="store_const",
+        const=None,
+        help="take a list of files to watch on standard in (default)",
+    )
 
-    p.add_option('-c', '--clear', default=True,
-                 action='store_true', dest='clear',
-                 help='clear screen before runs (default)')
-    p.add_option('-C', '--no-clear',
-                 action='store_false', dest='clear',
-                 help="don't clear screen before runs")
+    p.add_option(
+        "-c",
+        "--clear",
+        default=True,
+        action="store_true",
+        dest="clear",
+        help="clear screen before runs (default)",
+    )
+    p.add_option(
+        "-C",
+        "--no-clear",
+        action="store_false",
+        dest="clear",
+        help="don't clear screen before runs",
+    )
 
-    p.add_option('-v', '--verbose', default=True,
-                 action='store_true', dest='verbose',
-                 help='show extra logging output (default)')
-    p.add_option('-q', '--quiet',
-                 action='store_false', dest='verbose',
-                 help="don't show extra logging output")
+    p.add_option(
+        "-v",
+        "--verbose",
+        default=True,
+        action="store_true",
+        dest="verbose",
+        help="show extra logging output (default)",
+    )
+    p.add_option(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="verbose",
+        help="don't show extra logging output",
+    )
 
-    p.add_option('-w', '--whitespace', default=None,
-                 action='store_const', dest='sep', const=None,
-                 help="assume paths are separated by whitespace (default)")
-    p.add_option('-n', '--newlines',
-                 action='store_const', dest='sep', const='\n',
-                 help="assume paths are separated by newlines")
-    p.add_option('-s', '--spaces',
-                 action='store_const', dest='sep', const=' ',
-                 help="assume paths are separated by spaces")
-    p.add_option('-0', '--zero',
-                 action='store_const', dest='sep', const='\0',
-                 help="assume paths are separated by null bytes")
+    p.add_option(
+        "-w",
+        "--whitespace",
+        default=None,
+        action="store_const",
+        dest="sep",
+        const=None,
+        help="assume paths are separated by whitespace (default)",
+    )
+    p.add_option(
+        "-n",
+        "--newlines",
+        action="store_const",
+        dest="sep",
+        const="\n",
+        help="assume paths are separated by newlines",
+    )
+    p.add_option(
+        "-s",
+        "--spaces",
+        action="store_const",
+        dest="sep",
+        const=" ",
+        help="assume paths are separated by spaces",
+    )
+    p.add_option(
+        "-0",
+        "--zero",
+        action="store_const",
+        dest="sep",
+        const="\0",
+        help="assume paths are separated by null bytes",
+    )
 
     return p
 
@@ -126,15 +187,15 @@ def build_option_parser():
 def _main():
     if dynamic:
         log("Running the following command to generate watch list:")
-        log('  ' + dynamic)
-        log('')
+        log("  " + dynamic)
+        log("")
 
     log("Watching the following paths:")
     for p in get_paths():
-        log('  ' + str(p))
-    log('')
-    log('Checking for changes every %d milliseconds.' % int(interval * 1000))
-    log('')
+        log("  " + str(p))
+    log("")
+    log("Checking for changes every %d milliseconds." % int(interval * 1000))
+    log("")
 
     run()
 
@@ -142,8 +203,9 @@ def _main():
         time.sleep(interval)
         if check(get_paths()):
             if clear:
-                subprocess.check_call('clear')
+                subprocess.check_call("clear")
             run()
+
 
 def smart_interval(count):
     """Return the smart interval to use in milliseconds."""
@@ -152,6 +214,7 @@ def smart_interval(count):
     else:
         sq = lambda n: n * n
         return int(1000 * (1 - (sq(50.0 - count) / sq(50))))
+
 
 def _parse_interval(options):
     global get_paths
@@ -164,17 +227,19 @@ def _parse_interval(options):
 
     return i / 1000.0
 
+
 def _parse_paths(sep, data):
     if not sep:
         paths = data.split()
     else:
         paths = data.split(sep)
 
-    paths = [p.rstrip(b'\n') for p in paths if p]
+    paths = [p.rstrip(b"\n") for p in paths if p]
     paths = map(os.path.abspath, paths)
     paths = set(paths)
 
     return paths
+
 
 def main():
     global interval, command, clear, get_paths, verbose, dynamic
@@ -191,6 +256,7 @@ def main():
     dynamic = options.dynamic
 
     if dynamic:
+
         def _get_paths():
             data = subprocess.check_output(dynamic, shell=True)
             return _parse_paths(sep, data)
@@ -205,7 +271,7 @@ def main():
 
         for path in paths:
             if not os.path.exists(path):
-                die('path to watch does not exist: ' + repr(path))
+                die("path to watch does not exist: " + repr(path))
 
         get_paths = lambda: paths
 
@@ -214,11 +280,12 @@ def main():
     _main()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import signal
+
     def sigint_handler(signal, frame):
-        sys.stdout.write('\n')
+        sys.stdout.write("\n")
         sys.exit(130)
+
     signal.signal(signal.SIGINT, sigint_handler)
     main()
-
