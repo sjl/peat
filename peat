@@ -131,7 +131,7 @@ def _main():
 
     log("Watching the following paths:")
     for p in get_paths():
-        log('  ' + p)
+        log('  ' + str(p))
     log('')
     log('Checking for changes every %d milliseconds.' % int(interval * 1000))
     log('')
@@ -170,7 +170,7 @@ def _parse_paths(sep, data):
     else:
         paths = data.split(sep)
 
-    paths = [p.rstrip('\n') for p in paths if p]
+    paths = [p.rstrip(b'\n') for p in paths if p]
     paths = map(os.path.abspath, paths)
     paths = set(paths)
 
